@@ -1,0 +1,220 @@
+{
+  "counts": {
+    "1_交易下单": 37,
+    "2_拼单": 24,
+    "3_核心流程": 20,
+    "4_配置映射": 12,
+    "6_集成": 7,
+    "5_体验": 6,
+    "6_通知": 5,
+    "其他": 3
+  },
+  "samples": {
+    "1_交易下单": [
+      {
+        "id": 7999,
+        "title": "【发起tapon】下单发起tapon未带入marketplace配置信息",
+        "status": "已关闭"
+      },
+      {
+        "id": 8001,
+        "title": "【发起tapon】订单详情发起tapon，Denomination未带入订单数值",
+        "status": "已关闭"
+      },
+      {
+        "id": 8002,
+        "title": "【发起tapon】Phoenix订单详情发起tapon失败",
+        "status": "已关闭"
+      },
+      {
+        "id": 8013,
+        "title": "【tapon权限】从tapon审批通过的订单不应该出现发起tapon按钮",
+        "status": "已关闭"
+      },
+      {
+        "id": 8014,
+        "title": "【tapon字段映射】下单tapon选择的下单方式是非市价，订单详情显示的都为市价",
+        "status": "已关闭"
+      }
+    ],
+    "2_拼单": [
+      {
+        "id": 8022,
+        "title": "【lastlook】多组询价某条lastlook，全部拼单下架",
+        "status": "已关闭"
+      },
+      {
+        "id": 8027,
+        "title": "【拼单卡片】募集金额小于起投金额，显示红色 Pending Approval",
+        "status": "已关闭"
+      },
+      {
+        "id": 8031,
+        "title": "我的拼单投资金额缺失单位",
+        "status": "已关闭"
+      },
+      {
+        "id": 8036,
+        "title": "【拼单卡片+详情】募集金额统计无效拼单意向金额",
+        "status": "已关闭"
+      },
+      {
+        "id": 8039,
+        "title": "【发起拼单】拼单到期时间无法选取日期",
+        "status": "已关闭"
+      }
+    ],
+    "3_核心流程": [
+      {
+        "id": 7990,
+        "title": "【tapon权限】开启tapon的机构，新增管理员，创建页面没有显示发起tapon按钮",
+        "status": "已关闭"
+      },
+      {
+        "id": 7992,
+        "title": "【发起tapon】交易列表aq产品也能发起tapon",
+        "status": "已关闭"
+      },
+      {
+        "id": 7996,
+        "title": "【Tapon】询价列表Ko\\KI数值未显示",
+        "status": "已关闭"
+      },
+      {
+        "id": 7997,
+        "title": "【发起tapon】tapon中价格lastlook发起成功",
+        "status": "已关闭"
+      },
+      {
+        "id": 7998,
+        "title": "发起tapon面值、最小发行金额金额，最大投资金额可输入小数",
+        "status": "已关闭"
+      }
+    ],
+    "4_配置映射": [
+      {
+        "id": 7991,
+        "title": "【发起tapon】Maximum Size为非必填字段，校验显示必填",
+        "status": "已关闭"
+      },
+      {
+        "id": 7994,
+        "title": "【Tapon配置】最大投资金额、最低起投金额和面值之间未做校验",
+        "status": "已关闭"
+      },
+      {
+        "id": 7995,
+        "title": "【Tapon配置】最大投资金额、最低起投金额和面值之间未做校验",
+        "status": "已解决"
+      },
+      {
+        "id": 8015,
+        "title": "【发起tapon】询价发起tapon带入Gross Margin字段",
+        "status": "已解决"
+      },
+      {
+        "id": 8028,
+        "title": "【tapon字段映射】Sales Code在交易详情中未显示",
+        "status": "已关闭"
+      }
+    ],
+    "5_体验": [
+      {
+        "id": 8035,
+        "title": "募集金额为零时，进度条未显示进度",
+        "status": "已关闭"
+      },
+      {
+        "id": 8040,
+        "title": "【UI优化】进度条Raised悬浮显示效果优化",
+        "status": "已关闭"
+      },
+      {
+        "id": 8076,
+        "title": "【日志】操作记录缺失时间",
+        "status": "已关闭"
+      },
+      {
+        "id": 8079,
+        "title": "【日志】日志显示问题",
+        "status": "已关闭"
+      },
+      {
+        "id": 8080,
+        "title": "【需求优化】日志未做中文翻译",
+        "status": "已关闭"
+      }
+    ],
+    "6_通知": [
+      {
+        "id": 8064,
+        "title": "【tapon通知】第二次满足最低拼单金额后，收到审批邮件​错误",
+        "status": "已关闭"
+      },
+      {
+        "id": 8069,
+        "title": "【tapon通知】到期自动下架，参与人邮件通知里面缺少taponid和issuer",
+        "status": "已关闭"
+      },
+      {
+        "id": 8089,
+        "title": "【tapon通知】缺少logo和机构链接",
+        "status": "已关闭"
+      },
+      {
+        "id": 8091,
+        "title": "【tapon通知】tapon邮件通知size 缺少单位",
+        "status": "已关闭"
+      },
+      {
+        "id": 8096,
+        "title": "【tapon通知】多条通知，邮件没有按照需求要求合并",
+        "status": "已关闭"
+      }
+    ],
+    "6_集成": [
+      {
+        "id": 8007,
+        "title": "【配置】marketplace配置返回显示为--",
+        "status": "已关闭"
+      },
+      {
+        "id": 8044,
+        "title": "【marketplace】列表页面刷新请求两次接口",
+        "status": "已关闭"
+      },
+      {
+        "id": 8071,
+        "title": "【优化】marketplace 新建BEN 默认Bonus值为100",
+        "status": "已关闭"
+      },
+      {
+        "id": 8107,
+        "title": "【app-tapon】tapon详情状态卡票显示，未选中的卡片没有显示颜色",
+        "status": "已关闭"
+      },
+      {
+        "id": 8113,
+        "title": "【UAT优化】机构管理员marketplace-顶部My Approval未做同步推送",
+        "status": "已关闭"
+      }
+    ],
+    "其他": [
+      {
+        "id": 8006,
+        "title": "【配置】Denomination/Minumum Investment、Maximum Launch Size、Min Size to launch配置为空返回为0",
+        "status": "已解决"
+      },
+      {
+        "id": 8065,
+        "title": "【历史问题】同endclietcode配置客户经理的订单订单列表不可见",
+        "status": "已关闭"
+      },
+      {
+        "id": 8097,
+        "title": "【存续】订单生成存续报错空指针",
+        "status": "已关闭"
+      }
+    ]
+  }
+}

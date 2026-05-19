@@ -1,0 +1,8 @@
+说明：本仓库的 Agent 规则已迁移到结构化的 Cursor Rules 文件中。
+
+请参阅：.cursor/rules/test-engineer.mdc
+
+迁移原因：
+- 旧的 .cursorrules 为单一文本文件，无法按文件类型/场景生效
+- 新的 .mdc 格式支持 frontmatter（globs / alwaysApply），可对 **/*.py 自动激活
+- 内容已扩展为完整的资深测试开发工程师规范，包含技术栈、异常处理、AAA 模式、产物清单、禁止事项等

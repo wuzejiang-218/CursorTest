@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>业务测试平台 · 询价 / 下单 / 存续</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* 深色模式（默认） */
+    :root, [data-theme="dark"] {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --border: #2d3a4d;
+      --text: #e6edf3;
+      --muted: #8b9cb3;
+      --accent: #3b82f6;
+      --accent-dim: rgba(59, 130, 246, 0.15);
+      --ok: #22c55e;
+      --warn: #eab308;
+      --err: #ef4444;
+      --rfq-card-bg: #1a2332;
+      --rfq-card-border: #2d3a4d;
+      --rfq-card-text: #e6edf3;
+      --rfq-card-muted: #8b9cb3;
+      --rfq-input-bg: #243044;
+      --rfq-input-border: #2d3a4d;
+    }
+
+    /* 浅色模式 */
+    [data-theme="light"] {
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --surface2: #f8fafc;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --accent: #2563eb;
+      --accent-dim: rgba(37, 99, 235, 0.1);
+      --ok: #16a34a;
+      --warn: #ca8a04;
+      --err: #dc2626;
+      --rfq-card-bg: #ffffff;
+      --rfq-card-border: #e2e8f0;
+      --rfq-card-text: #1e293b;
+      --rfq-card-muted: #64748b;
+      --rfq-input-bg: #ffffff;
+      --rfq-input-border: #e2e8f0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans SC', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    header h1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    header h1 span { color: var(--accent); font-weight: 700; }
+
+    .env-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.35rem 0.65rem;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-radius: 6px;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+    }
+
+    .layout {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    nav {
+      width: 200px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1rem 0;
+    }
+
+    nav button {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.75rem 1.25rem;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    nav button:hover { color: var(--text); background: var(--accent-dim); }
+    nav button.active {
+      color: var(--accent);
+      background: var(--accent-dim);
+      border-right: 3px solid var(--accent);
+    }
+
+    nav button .ico { font-size: 1.1rem; }
+
+    main {
+      flex: 1;
+      padding: 1.25rem 1.5rem;
+      overflow: auto;
+    }
+
+    .panel { display: none; animation: fade 0.2s ease; }
+    .panel.active { display: block; }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .panel h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--muted);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.5rem 0.65rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.875rem;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    textarea { min-height: 72px; resize: vertical; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      padding: 0.55rem 1.1rem;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .log-box {
+      margin-top: 1rem;
+      background: #0a0e12;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      max-height: 280px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      line-height: 1.6;
+    }
+
+    .log-line { margin-bottom: 0.35rem; word-break: break-all; }
+    .log-line .t { color: var(--muted); }
+    .log-line.ok { color: var(--ok); }
+    .log-line.err { color: var(--err); }
+    .log-line.info { color: #38bdf8; }
+
+    .status-pill {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .status-pill.pending { background: rgba(234, 179, 8, 0.2); color: var(--warn); }
+    .status-pill.success { background: rgba(34, 197, 94, 0.2); color: var(--ok); }
+    .status-pill.fail { background: rgba(239, 68, 68, 0.2); color: var(--err); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 0.5rem 0.65rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th { color: var(--muted); font-weight: 500; }
+
+    /* 新增询价 - 随主题切换 */
+    #panel-rfq .rfq-page-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
+    #panel-rfq .rfq-card { background: var(--rfq-card-bg); border: 1px solid var(--rfq-card-border); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; color: var(--rfq-card-text); }
+    #panel-rfq .rfq-card .label { font-size: 0.8rem; color: var(--rfq-card-muted); margin-bottom: 0.35rem; }
+    #panel-rfq .rfq-card .label .req { color: var(--err); }
+    #panel-rfq .rfq-card input, #panel-rfq .rfq-card select, #panel-rfq .rfq-card textarea {
+      background: var(--rfq-input-bg); border: 1px solid var(--rfq-input-border); color: var(--rfq-card-text); padding: 0.45rem 0.6rem; border-radius: 6px; font-size: 0.875rem;
+    }
+    #panel-rfq .rfq-header-row { display: grid; grid-template-columns: auto 1fr 1fr 1fr 1fr; gap: 1rem; align-items: end; margin-bottom: 1rem; flex-wrap: wrap; }
+    #panel-rfq .rfq-header-row .field { min-width: 140px; }
+    .scenario-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .scenario-tabs .tab { padding: 0.4rem 1rem; font-size: 0.875rem; border: 1px solid var(--rfq-card-border); background: var(--rfq-input-bg); border-radius: 6px; cursor: pointer; color: var(--rfq-card-muted); }
+    .scenario-tabs .tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .product-tabs { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 1rem; border-bottom: 1px solid var(--rfq-card-border); }
+    .product-tabs .tab { padding: 0.5rem 0.75rem; font-size: 0.8rem; border: none; background: transparent; color: var(--rfq-card-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+    .product-tabs .tab:hover { color: var(--rfq-card-text); }
+    .product-tabs .tab.active { color: var(--accent); font-weight: 600; border-bottom-color: var(--accent); }
+    .rfq-form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem 1.5rem; }
+    .rfq-form-grid .field { display: flex; flex-direction: column; }
+    .rfq-form-grid .field.full { grid-column: 1 / -1; }
+    .rfq-actions-bar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+    .rfq-actions-bar .btn-icon { padding: 0.4rem 0.75rem; font-size: 0.8rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; }
+    .rfq-actions-bar .btn-icon.import { color: var(--accent); background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); }
+    .rfq-actions-bar .btn-icon.del { color: #ef4444; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); }
+    .rfq-hint { font-size: 0.8rem; color: var(--accent); margin-top: 0.5rem; margin-bottom: 1rem; }
+    .rfq-submit { padding: 0.6rem 1.5rem; font-size: 0.9rem; background: var(--accent); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
+    .rfq-char-count { font-size: 0.75rem; color: var(--rfq-card-muted); margin-top: 0.25rem; }
+
+    #rfq-history tr:hover { background: var(--accent-dim); }
+
+    .rfq-und-picks { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .und-check {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.4rem 0.75rem; border: 1px solid var(--rfq-input-border); border-radius: 6px;
+      background: var(--rfq-input-bg); cursor: pointer; font-size: 0.85rem; color: var(--rfq-card-text);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .und-check:hover { border-color: var(--accent); }
+    .und-check input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+    .und-check input[type="checkbox"]:checked + span { color: var(--accent); font-weight: 600; }
+    .und-check .und-name { color: var(--rfq-card-muted); font-size: 0.75rem; }
+
+    /* 主题切换按钮 */
+    .theme-toggle {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--surface2); color: var(--text); cursor: pointer; font-size: 1.1rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .theme-toggle:hover { background: var(--accent-dim); border-color: var(--accent); }
+    [data-theme="light"] .theme-toggle .icon-dark { display: none; }
+    [data-theme="light"] .theme-toggle .icon-light { display: inline; }
+    .theme-toggle .icon-dark { display: inline; }
+    .theme-toggle .icon-light { display: none; }
+    nav .nav-sub { padding-left: 1.5rem; }
+    nav .nav-sub button { font-size: 0.85rem; padding: 0.5rem 1rem; }
+    nav .nav-sub button.active { color: var(--accent); }
+
+    /* 首页 · 市场热度排名 */
+    #panel-home .home-title { font-size: 1.35rem; font-weight: 600; margin-bottom: 0.35rem; color: var(--text); }
+    #panel-home .home-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.25rem; }
+    .market-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+    .market-tabs .mtab {
+      padding: 0.45rem 1rem; font-size: 0.875rem; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--surface2); color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .market-tabs .mtab:hover { color: var(--text); border-color: var(--accent); }
+    .market-tabs .mtab.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); font-weight: 600; }
+    .heat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+    .heat-card .heat-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .heat-card .heat-head h3 { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .heat-card .heat-note { font-size: 0.72rem; color: var(--muted); }
+    .heat-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .heat-table th { text-align: left; padding: 0.5rem 0.6rem; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+    .heat-table td { padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--border); }
+    .heat-table tr:hover td { background: var(--accent-dim); }
+    .heat-rank { font-weight: 700; color: var(--accent); width: 2.5rem; }
+    .heat-rank.top3 { color: #f59e0b; }
+    .heat-up { color: var(--ok); font-weight: 500; }
+    .heat-down { color: var(--err); font-weight: 500; }
+    .heat-flat { color: var(--muted); }
+    .heat-score { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+    /* 研报 · 全球市场与分标的 */
+    #panel-research .home-title { font-size: 1.35rem; font-weight: 600; margin-bottom: 0.35rem; color: var(--text); }
+    #panel-research .home-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem; max-width: 52rem; line-height: 1.55; }
+    .globe-strip {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem;
+    }
+    .idx-chip {
+      flex: 1 1 140px; min-width: 130px; padding: 0.65rem 0.85rem; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--surface2);
+    }
+    .idx-chip .nm { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .idx-chip .px { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-top: 0.15rem; font-variant-numeric: tabular-nums; }
+    .idx-chip .ch { font-size: 0.78rem; margin-top: 0.2rem; }
+    .research-blurb {
+      font-size: 0.875rem; color: var(--text); line-height: 1.6; padding: 0.85rem 1rem;
+      background: var(--surface2); border-radius: 8px; border-left: 3px solid var(--accent); margin-bottom: 1rem;
+    }
+    .cross-pair { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
+    .cross-pair code { font-family: JetBrains Mono, monospace; font-size: 0.78rem; color: var(--accent); }
+
+    .fa-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+    @media (max-width: 900px) { .fa-two-col { grid-template-columns: 1fr; } }
+    .fa-box {
+      padding: 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2);
+      font-size: 0.85rem; line-height: 1.65; color: var(--text);
+    }
+    .fa-box h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text); }
+    .fa-box .tag { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.45rem; border-radius: 4px; background: var(--accent-dim); color: var(--accent); margin-bottom: 0.5rem; }
+    .fa-list { margin: 0.75rem 0 0 1rem; color: var(--muted); font-size: 0.82rem; }
+    .fa-list li { margin-bottom: 0.35rem; }
+
+    @media (max-width: 720px) {
+      .layout { flex-direction: column; }
+      nav { width: 100%; display: flex; flex-wrap: wrap; padding: 0.5rem; gap: 0.25rem; }
+      nav button { width: auto; flex: 1; min-width: 100px; justify-content: center; border-right: none !important; border-radius: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><span>●</span> 业务测试平台</h1>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <button type="button" class="theme-toggle" id="theme-toggle" title="切换深色/浅色模式" aria-label="主题切换">
+        <span class="icon-dark">🌙</span>
+        <span class="icon-light">☀️</span>
+      </button>
+      <span class="env-badge" id="api-status">检测 API…</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav>
+      <button type="button" class="active" data-panel="home"><span class="ico">🏠</span> 首页</button>
+      <button type="button" data-panel="rfq"><span class="ico">🏢</span> 机构租户</button>
+      <button type="button" data-panel="rfq"><span class="ico">📋</span> 发行商租户</button>
+      <button type="button" data-panel="rfq"><span class="ico">📊</span> 询价</button>
+      <div class="nav-sub">
+        <button type="button" class="active" data-panel="rfq">新增询价</button>
+        <button type="button" data-panel="rfq">新增询价-ELI</button>
+        <button type="button" data-panel="rfq">询价历史</button>
+        <button type="button" data-panel="rfq">每日询价</button>
+      </div>
+      <button type="button" data-panel="order"><span class="ico">📝</span> 交易</button>
+      <button type="button" data-panel="lifecycle"><span class="ico">🔄</span> 存续</button>
+      <button type="button" data-panel="rfq"><span class="ico">🤖</span> AI助手</button>
+      <button type="button" data-panel="research"><span class="ico">📈</span> 研报 & 市场洞察</button>
+      <button type="button" data-panel="rfq"><span class="ico">💬</span> 消息</button>
+      <button type="button" data-panel="rfq"><span class="ico">⚙</span> 配置</button>
+    </nav>
+
+    <main>
+      <!-- 首页 · 各市场股票热度排名（演示数据） -->
+      <section id="panel-home" class="panel active">
+        <h1 class="home-title">首页</h1>
+        <p class="home-sub">各市场关注度与结构化产品询价热度参考（以下为演示数据，非实时行情）</p>
+
+        <div class="heat-card">
+          <div class="market-tabs" id="home-market-tabs">
+            <button type="button" class="mtab active" data-market="us">美股</button>
+            <button type="button" class="mtab" data-market="hk">港股</button>
+            <button type="button" class="mtab" data-market="cn">A股 · 沪深</button>
+          </div>
+          <div class="heat-head">
+            <h3 id="home-market-title">美股 · 热度榜</h3>
+            <span class="heat-note">热度指数：综合搜索、自选与询价标的提及（模拟）</span>
+          </div>
+          <table class="heat-table">
+            <thead>
+              <tr>
+                <th style="width:3rem;">#</th>
+                <th>代码</th>
+                <th>名称</th>
+                <th>热度</th>
+                <th>涨跌（演示）</th>
+              </tr>
+            </thead>
+            <tbody id="home-rank-body"></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">快捷入口</div>
+          <p style="font-size: 0.875rem; color: var(--muted); margin-bottom: 0.75rem;">前往左侧「询价 → 新增询价」发起 FCN / ELN 等产品询价。</p>
+          <button type="button" class="btn btn-primary" id="btn-home-goto-rfq">去新增询价</button>
+        </div>
+      </section>
+
+      <!-- 询价 - 新增询价（EasyConnect 风格） -->
+      <section id="panel-rfq" class="panel">
+        <h1 class="rfq-page-title">新增询价</h1>
+
+        <div class="rfq-card">
+          <div class="rfq-header-row">
+            <div class="field">
+              <div class="label">场景</div>
+              <div class="scenario-tabs">
+                <button type="button" class="tab active" data-scenario="normal">普通</button>
+                <button type="button" class="tab" data-scenario="combo">组合生成</button>
+              </div>
+            </div>
+            <div class="field">
+              <div class="label">机构 <span class="req">*</span></div>
+              <select id="rfq-institution">
+                <option>请选择</option>
+                <option>CAI HK</option>
+                <option>CAI SG</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="label">用户 <span class="req">*</span></div>
+              <select id="rfq-user">
+                <option>请选择</option>
+                <option>admin</option>
+                <option>trader1</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="label">询价通道 <span class="req">*</span></div>
+              <select id="rfq-channel">
+                <option>请选择</option>
+                <option>CAI HK</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="label">发行方</div>
+              <input id="rfq-issuer" type="text" placeholder="可选" />
+            </div>
+          </div>
+        </div>
+
+        <div class="rfq-card">
+          <div class="product-tabs">
+            <button type="button" class="tab active" data-product="FCN">FCN</button>
+            <button type="button" class="tab" data-product="Step-down FCN">Step-down FCN</button>
+            <button type="button" class="tab" data-product="Sharkfin">Sharkfin</button>
+            <button type="button" class="tab" data-product="BEN">BEN</button>
+            <button type="button" class="tab" data-product="DCN">DCN</button>
+            <button type="button" class="tab" data-product="ELN">ELN</button>
+            <button type="button" class="tab" data-product="WRA">WRA</button>
+            <button type="button" class="tab" data-product="Step-down SCN">Step-down SCN</button>
+            <button type="button" class="tab" data-product="Phoenix">Phoenix</button>
+            <button type="button" class="tab" data-product="AQ">AQ</button>
+            <button type="button" class="tab" data-product="DQ">DQ</button>
+            <button type="button" class="tab" data-product="VAN">VAN</button>
+          </div>
+          <div class="rfq-actions-bar">
+            <button type="button" class="btn-icon import">+ 导入</button>
+            <button type="button" class="btn-icon del">− 删除</button>
+          </div>
+          <div class="rfq-form-grid">
+            <div class="field">
+              <div class="label">编号</div>
+              <input id="rfq-no" type="text" value="1" readonly />
+            </div>
+            <div class="field">
+              <div class="label">货币</div>
+              <select id="rfq-currency">
+                <option value="USD">美元</option>
+                <option value="EUR">欧元</option>
+                <option value="HKD">港币</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="label">标的 <span style="font-size: 0.7rem; color: var(--muted);">(<span id="rfq-und-count">0</span>/4)</span></div>
+              <div class="rfq-und-picks" id="rfq-und-picks">
+                <label class="und-check"><input type="checkbox" value="NVDA" /><span>NVDA</span><span class="und-name">英伟达</span></label>
+                <label class="und-check"><input type="checkbox" value="AAPL" /><span>AAPL</span><span class="und-name">苹果</span></label>
+                <label class="und-check"><input type="checkbox" value="TSLA" /><span>TSLA</span><span class="und-name">特斯拉</span></label>
+                <label class="und-check"><input type="checkbox" value="AMZN" /><span>AMZN</span><span class="und-name">亚马逊</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <div class="label">询价项</div>
+              <select id="rfq-solve-for">
+                <option value="strike">执行价 (%)</option>
+                <option value="coupon">年化票息 (%)</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="label">执行价 (%)</div>
+              <input id="rfq-strike" type="text" placeholder="—" />
+            </div>
+            <div class="field">
+              <div class="label">敲出方式</div>
+              <select id="rfq-ko-type">
+                <option value="period_end">期末观察</option>
+                <option value="daily">每日观察</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="label">敲出价 (%)</div>
+              <input id="rfq-ko" type="text" value="100" />
+            </div>
+            <div class="field">
+              <div class="label">年化票息 (%)</div>
+              <input id="rfq-coupon" type="text" value="12" />
+            </div>
+            <div class="field">
+              <div class="label">票面价格 (%)</div>
+              <input id="rfq-par" type="text" value="99" />
+            </div>
+            <div class="field">
+              <div class="label">期限 (月)</div>
+              <input id="rfq-tenor" type="number" value="6" min="1" max="360" />
+            </div>
+            <div class="field">
+              <div class="label">敲入方式</div>
+              <select id="rfq-ki-type">
+                <option value="na">不适用</option>
+                <option value="eop">期末</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="label">敲入价 (%)</div>
+              <input id="rfq-ki" type="text" placeholder="—" />
+            </div>
+            <div class="field">
+              <div class="label">观察频率 (月)</div>
+              <select id="rfq-obs-freq">
+                <option value="1">1</option>
+                <option value="3">3</option>
+                <option value="6">6</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="label">交割周期</div>
+              <select id="rfq-settle">
+                <option value="10">10</option>
+                <option value="5">5</option>
+                <option value="2">2</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="rfq-card">
+          <div class="label">备注</div>
+          <textarea id="rfq-remark" maxlength="100" placeholder="选填" style="min-height: 64px;"></textarea>
+          <div class="rfq-char-count"><span id="rfq-remark-count">0</span>/100</div>
+          <p class="rfq-hint">提示：FCN 不敲出条款请把敲出价设为 999</p>
+          <div class="btn-row">
+            <button type="button" class="rfq-submit" id="btn-rfq-send">提交</button>
+            <button type="button" class="btn btn-secondary" id="btn-rfq-clear">清空日志</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+            <span>执行记录 <span style="font-weight: 400; color: var(--muted); font-size: 0.75rem;">（每 10 秒自动刷新）</span></span>
+            <button type="button" class="btn btn-ghost" id="btn-rfq-refresh-history" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">刷新</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>时间</th><th>批次 ID</th><th>产品</th><th>标的</th><th>名义本金</th><th>期限(月)</th><th>报价数</th><th>来源</th></tr>
+            </thead>
+            <tbody id="rfq-history"></tbody>
+          </table>
+          <p id="rfq-history-empty" style="display: none; font-size: 0.85rem; color: var(--muted); padding: 0.75rem 0;">暂无记录。</p>
+        </div>
+        <div class="card">
+          <div class="card-title">报价结果</div>
+          <table>
+            <thead>
+              <tr><th>机构</th><th>报价 ID</th><th>年化票息 %</th><th>状态</th></tr>
+            </thead>
+            <tbody id="rfq-results"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">执行日志</div>
+          <div class="log-box" id="log-rfq"></div>
+        </div>
+      </section>
+
+      <!-- 询价详情 -->
+      <section id="panel-rfq-detail" class="panel">
+        <div style="margin-bottom: 1rem;">
+          <button type="button" class="btn btn-ghost" id="btn-rfq-back" style="padding: 0.4rem 0.85rem; font-size: 0.85rem;">← 返回询价列表</button>
+        </div>
+        <h1 class="rfq-page-title">询价详情</h1>
+
+        <div class="rfq-card">
+          <div class="card-title">概要信息</div>
+          <div class="rfq-form-grid">
+            <div class="field"><div class="label">批次 ID</div><input id="detail-batch-id" readonly /></div>
+            <div class="field"><div class="label">提交时间</div><input id="detail-time" readonly /></div>
+            <div class="field"><div class="label">产品类型</div><input id="detail-product" readonly /></div>
+            <div class="field"><div class="label">来源</div><input id="detail-source" readonly /></div>
+          </div>
+        </div>
+
+        <div class="rfq-card">
+          <div class="card-title">询价参数</div>
+          <div class="rfq-form-grid">
+            <div class="field"><div class="label">标的</div><input id="detail-underlying" readonly /></div>
+            <div class="field"><div class="label">货币</div><input id="detail-currency" readonly /></div>
+            <div class="field"><div class="label">名义本金</div><input id="detail-notional" readonly /></div>
+            <div class="field"><div class="label">期限 (月)</div><input id="detail-tenor" readonly /></div>
+            <div class="field"><div class="label">询价项</div><input id="detail-solve-for" readonly /></div>
+            <div class="field"><div class="label">执行价 (%)</div><input id="detail-strike" readonly /></div>
+            <div class="field"><div class="label">敲出方式</div><input id="detail-ko-type" readonly /></div>
+            <div class="field"><div class="label">敲出价 (%)</div><input id="detail-ko" readonly /></div>
+            <div class="field"><div class="label">年化票息 (%)</div><input id="detail-coupon" readonly /></div>
+            <div class="field"><div class="label">票面价格 (%)</div><input id="detail-par" readonly /></div>
+            <div class="field"><div class="label">敲入方式</div><input id="detail-ki-type" readonly /></div>
+            <div class="field"><div class="label">敲入价 (%)</div><input id="detail-ki" readonly /></div>
+            <div class="field"><div class="label">观察频率 (月)</div><input id="detail-obs-freq" readonly /></div>
+            <div class="field"><div class="label">交割周期</div><input id="detail-settle" readonly /></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">各机构报价 (<span id="detail-quote-count">0</span> 家)</div>
+          <table>
+            <thead>
+              <tr><th>#</th><th>机构</th><th>报价 ID</th><th>年化票息 %</th><th>状态</th></tr>
+            </thead>
+            <tbody id="detail-quotes"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 研报 & 市场洞察：全球市场 + 分市场标的 -->
+      <section id="panel-research" class="panel">
+        <h1 class="home-title">研报 & 市场洞察</h1>
+        <p class="home-sub">
+          按<strong>不同市场</strong>与<strong>重点标的</strong>汇总全球主要股指与个股层面的行情摘要、波动与结构化询价相关提示。
+          以下为<strong>演示数据</strong>，非实时行情；接入行情源后可替换为实时推送。
+        </p>
+
+        <div class="card">
+          <div class="card-title">全球主要指数 · 快照（演示）</div>
+          <div class="globe-strip" id="research-global-strip"></div>
+        </div>
+
+        <div class="heat-card">
+          <div class="market-tabs" id="research-market-tabs">
+            <button type="button" class="mtab active" data-rm="us">美股标的</button>
+            <button type="button" class="mtab" data-rm="hk">港股标的</button>
+            <button type="button" class="mtab" data-rm="cn">A股标的</button>
+            <button type="button" class="mtab" data-rm="eu">欧股标的</button>
+            <button type="button" class="mtab" data-rm="jp">日股标的</button>
+          </div>
+          <h3 id="research-region-title" style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text);">美股 · 标的行情与要点</h3>
+          <p class="research-blurb" id="research-region-blurb"></p>
+          <table class="heat-table">
+            <thead>
+              <tr>
+                <th>代码</th>
+                <th>名称</th>
+                <th>最新（演示）</th>
+                <th>今日涨跌</th>
+                <th>研报 / 结构化要点</th>
+              </tr>
+            </thead>
+            <tbody id="research-symbol-body"></tbody>
+          </table>
+          <p class="cross-pair" id="research-cross"></p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">财务分析 · 小米集团-W（01810）vs 阿里巴巴-SW（09988）</div>
+          <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 1rem;">
+            以下为<strong>演示口径</strong>的对比摘要，用于研报页展示结构；非上市公司官方披露，接入投研系统后可替换为真实财报与一致预期。
+          </p>
+          <table class="heat-table">
+            <thead>
+              <tr>
+                <th style="min-width: 10rem;">指标（演示）</th>
+                <th>小米集团-W · 01810</th>
+                <th>阿里巴巴-SW · 09988</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>核心业务定位</td>
+                <td>智能手机 × AIoT × 汽车（人车家全生态）</td>
+                <td>中国商业 + 国际商业 + 云 + 菜鸟 + 本地生活</td>
+              </tr>
+              <tr>
+                <td>收入增速（YoY，演示）</td>
+                <td><span class="heat-up">+约 18%</span>（手机回暖 + 汽车交付爬坡）</td>
+                <td><span class="heat-up">+约 8%</span>（云与海外电商贡献）</td>
+              </tr>
+              <tr>
+                <td>综合毛利率（演示）</td>
+                <td>约 <strong>21%</strong>（硬件占比高，汽车仍处投入期）</td>
+                <td>约 <strong>42%</strong>（平台与广告、云拉高毛利）</td>
+              </tr>
+              <tr>
+                <td>盈利能力（演示）</td>
+                <td>经调整净利润同比改善；汽车业务短期拖累利润率</td>
+                <td>利润修复，回购与股东回报力度加大；云业务扭亏为盈进程受关注</td>
+              </tr>
+              <tr>
+                <td>现金与财务稳健性</td>
+                <td>现金储备充裕，造车资本开支与研发投入持续</td>
+                <td>净现金厚实，分拆与回购提升每股指标</td>
+              </tr>
+              <tr>
+                <td>结构化询价相关波动因子</td>
+                <td>手机出货量、SU 系列交付与毛利率、汇率（离岸人民币）</td>
+                <td>618/双 11 电商景气、云增速、监管与竞争格局、ADR/H 股联动</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="fa-two-col">
+            <div class="fa-box">
+              <span class="tag">01810 小米</span>
+              <h4>分析要点</h4>
+              <p>硬件规模与互联网服务 ARPU 共同决定利润弹性；汽车第二曲线若放量，收入结构将向「高单价、长周期」倾斜，但短期折旧与研发费用压制利润率。港股流动性与南向资金偏好对估值倍数影响明显。</p>
+              <ul class="fa-list">
+                <li>关注：全球智能手机份额、中国区高端化、IoT 生态货币化。</li>
+                <li>风险：行业竞争加剧、汽车业务现金流与产能爬坡不及预期。</li>
+              </ul>
+            </div>
+            <div class="fa-box">
+              <span class="tag">09988 阿里（9988）</span>
+              <h4>分析要点</h4>
+              <p>淘天 GMV 与 take rate 企稳是盈利底盘；国际数字商业与阿里云提供增长期权。股东回报（回购/分红）改善每股盈利感知，与美股 <code>BABA</code> 存在价差与汇率对冲需求。</p>
+              <ul class="fa-list">
+                <li>关注：云收入增速与利润率、菜鸟与本地生活减亏进度。</li>
+                <li>风险：电商价格战、宏观消费复苏节奏、海外业务合规成本。</li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="research-blurb" style="margin-top: 1rem; margin-bottom: 0;">
+            <strong>对比结论（演示）：</strong>小米偏「硬件+汽车」周期与制造效率；阿里偏「平台+云」与利润率修复。双标的入同一 FCN 篮子时，需重点测算<strong>相关系数</strong>与<strong>行业集中度</strong>——二者同属中资科技龙头，系统性风险（流动性、政策预期）存在同向性，不宜简单当作低相关组合。
+          </p>
+        </div>
+      </section>
+
+      <!-- 下单 -->
+      <section id="panel-order" class="panel">
+        <h2>下单测试</h2>
+        <div class="card">
+          <div class="card-title">订单参数</div>
+          <div class="grid">
+            <div>
+              <label>关联报价 ID</label>
+              <input id="order-rfq-id" type="text" autocomplete="off"
+                value="RFQ-20260313-001"
+                placeholder="请输入询价返回的报价 ID" />
+            </div>
+            <div>
+              <label>买卖方向</label>
+              <select id="order-side">
+                <option value="BUY">买入</option>
+                <option value="SELL">卖出</option>
+              </select>
+            </div>
+            <div>
+              <label>数量</label>
+              <input id="order-qty" type="number" value="1" />
+            </div>
+            <div>
+              <label>价格类型</label>
+              <select id="order-price-type">
+                <option value="LIMIT">限价</option>
+                <option value="MARKET">市价</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid" style="margin-top: 1rem;">
+            <div style="grid-column: 1 / -1;">
+              <label>备注（JSON 可选）</label>
+              <textarea id="order-extra" placeholder='{"custodian":"CAI"}'></textarea>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-primary" id="btn-order-submit">提交订单</button>
+            <button type="button" class="btn btn-secondary" id="btn-order-validate">校验参数</button>
+            <button type="button" class="btn btn-ghost" id="btn-order-clear">清空日志</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">订单状态</div>
+          <p id="order-status-text" style="font-size: 0.9rem; color: var(--muted);">尚未提交</p>
+        </div>
+        <div class="card">
+          <div class="card-title">执行日志</div>
+          <div class="log-box" id="log-order"></div>
+        </div>
+      </section>
+
+      <!-- 存续 -->
+      <section id="panel-lifecycle" class="panel">
+        <h2>存续（生命周期）测试</h2>
+        <div class="card">
+          <div class="card-title">合约 / 事件</div>
+          <div class="grid">
+            <div>
+              <label>合约编号</label>
+              <input id="lc-contract" type="text" value="CTR-20260313-10020260313033" />
+            </div>
+            <div>
+              <label>事件类型</label>
+              <select id="lc-event">
+                <option value="OBSERVATION">观察日</option>
+                <option value="COUPON">派息</option>
+                <option value="KNOCK_OUT">敲出</option>
+                <option value="MATURITY">到期</option>
+                <option value="AMENDMENT">条款变更</option>
+              </select>
+            </div>
+            <div>
+              <label>事件日期</label>
+              <input id="lc-date" type="date" />
+            </div>
+            <div>
+              <label>模拟结果</label>
+              <select id="lc-outcome">
+                <option value="success">成功</option>
+                <option value="pending">处理中</option>
+                <option value="fail">失败</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-primary" id="btn-lc-trigger">触发存续事件</button>
+            <button type="button" class="btn btn-secondary" id="btn-lc-query">查询合约快照</button>
+            <button type="button" class="btn btn-ghost" id="btn-lc-clear">清空日志</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">事件时间线（模拟）</div>
+          <table>
+            <thead>
+              <tr><th>时间</th><th>事件</th><th>状态</th></tr>
+            </thead>
+            <tbody id="lc-timeline"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">执行日志</div>
+          <div class="log-box" id="log-lifecycle"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      /** 黑暗/浅色模式：读取记忆，应用主题 */
+      var THEME_KEY = 'easytrade-theme';
+      function getTheme() {
+        try {
+          var t = localStorage.getItem(THEME_KEY);
+          return (t === 'light' || t === 'dark') ? t : 'dark';
+        } catch (e) { return 'dark'; }
+      }
+      function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+      }
+      setTheme(getTheme());
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        setTheme(next);
+      });
+
+      /** 后端地址：同页打开时用当前域名端口；本地文件打开时自动试 8000/8001/8002，或用 ?port=8001 */
+      var API = '';
+
+      function apiUrl(path) {
+        return (API || '') + path;
+      }
+
+      function apiDisplay() {
+        if (API) return API;
+        if (window.location.protocol !== 'file:') return window.location.origin;
+        return 'http://127.0.0.1:8000';
+      }
+
+      function nowStr() {
+        var d = new Date();
+        return d.toISOString().replace('T', ' ').slice(0, 23);
+      }
+
+      function setApiBadge(text, ok) {
+        var el = document.getElementById('api-status');
+        if (!el) return;
+        el.textContent = text;
+        el.style.borderColor = ok ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.45)';
+        el.style.color = ok ? '#22c55e' : '#f87171';
+        el.style.background = ok ? 'rgba(34, 197, 94, 0.12)' : 'rgba(239, 68, 68, 0.1)';
+      }
+
+      function checkHealth(cb) {
+        fetch(apiUrl('/api/health'), { method: 'GET' })
+          .then(function (r) { return r.json(); })
+          .then(function () {
+            setApiBadge('API 已连接 · ' + apiDisplay(), true);
+            loadRfqHistory();
+            if (document.getElementById('panel-rfq') && document.getElementById('panel-rfq').classList.contains('active')) {
+              startRfqHistoryPoll();
+            }
+            if (cb) cb(true);
+          })
+          .catch(function () {
+            setApiBadge('后端未连接 · 请先启动 uvicorn，端口与浏览器一致(8000或8001)', false);
+            if (cb) cb(false);
+          });
+      }
+
+      function discoverApiThenHealth() {
+        if (window.location.protocol !== 'file:') {
+          API = '';
+          checkHealth();
+          return;
+        }
+        var forced = new URLSearchParams(window.location.search).get('port');
+        if (forced) {
+          API = 'http://127.0.0.1:' + parseInt(forced, 10);
+          checkHealth();
+          return;
+        }
+        var ports = [8000, 8001, 8002];
+        function tryPort(idx) {
+          if (idx >= ports.length) {
+            API = 'http://127.0.0.1:8000';
+            checkHealth();
+            return;
+          }
+          var base = 'http://127.0.0.1:' + ports[idx];
+          fetch(base + '/api/health', { method: 'GET' })
+            .then(function (r) {
+              if (r.ok) {
+                API = base;
+                checkHealth();
+              } else tryPort(idx + 1);
+            })
+            .catch(function () { tryPort(idx + 1); });
+        }
+        tryPort(0);
+      }
+
+      discoverApiThenHealth();
+
+      function log(containerId, level, msg) {
+        var box = document.getElementById(containerId);
+        var line = document.createElement('div');
+        line.className = 'log-line ' + (level || '');
+        line.innerHTML = '<span class="t">[' + nowStr() + ']</span> ' + msg;
+        box.appendChild(line);
+        box.scrollTop = box.scrollHeight;
+      }
+
+      function clearLog(id) {
+        document.getElementById(id).innerHTML = '';
+      }
+
+      /** 拉取询价执行记录并渲染（含页面提交与 run_fcn_rfq.py 自动化） */
+      var rfqHistoryTimer = null;
+      function startRfqHistoryPoll() {
+        if (rfqHistoryTimer) return;
+        rfqHistoryTimer = setInterval(loadRfqHistory, 10000);
+      }
+      function stopRfqHistoryPoll() {
+        if (rfqHistoryTimer) {
+          clearInterval(rfqHistoryTimer);
+          rfqHistoryTimer = null;
+        }
+      }
+      function loadRfqHistory() {
+        var tbody = document.getElementById('rfq-history');
+        var emptyEl = document.getElementById('rfq-history-empty');
+        if (!tbody) return;
+        var url = apiUrl('/api/rfq/list');
+        if (!url) {
+          tbody.innerHTML = '';
+          if (emptyEl) { emptyEl.style.display = 'block'; emptyEl.textContent = '请通过 http://127.0.0.1:8000/ 打开页面以同步执行记录。'; }
+          return;
+        }
+        fetch(url, { method: 'GET' })
+          .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('')); })
+          .then(function (data) {
+            var items = data.items || [];
+            tbody.innerHTML = '';
+            if (items.length === 0) {
+              if (emptyEl) { emptyEl.style.display = 'block'; emptyEl.textContent = '暂无记录。页面提交或运行 python run_fcn_rfq.py 后会自动同步（约 10 秒内）。'; }
+              return;
+            }
+            if (emptyEl) { emptyEl.style.display = 'none'; emptyEl.textContent = ''; }
+            var sourceLabel = { web: '页面', automation: '自动化', script: '脚本' };
+            items.forEach(function (it) {
+              var tr = document.createElement('tr');
+              tr.style.cursor = 'pointer';
+              tr.title = '点击查看详情';
+              tr.innerHTML =
+                '<td>' + (it.created_at_iso || '') + '</td>' +
+                '<td style="color: var(--accent); text-decoration: underline;">' + (it.batch_id || '') + '</td>' +
+                '<td>' + (it.product || '') + '</td>' +
+                '<td>' + (it.underlying || '') + '</td>' +
+                '<td>' + (it.notional != null ? Number(it.notional).toLocaleString() : '') + '</td>' +
+                '<td>' + (it.tenor_months != null ? it.tenor_months : '') + '</td>' +
+                '<td>' + (it.quote_count != null ? it.quote_count : '') + '</td>' +
+                '<td>' + (sourceLabel[it.source] || it.source || '—') + '</td>';
+              tr.addEventListener('click', (function (batchId) {
+                return function () { openRfqDetail(batchId); };
+              })(it.batch_id));
+              tbody.appendChild(tr);
+            });
+          })
+          .catch(function () {
+            tbody.innerHTML = '';
+            if (emptyEl) {
+              emptyEl.style.display = 'block';
+              emptyEl.textContent = '加载失败或暂无记录，请确认后端已启动（同端口）后点击「刷新」。';
+            }
+          });
+      }
+
+      /** 打开询价详情 */
+      var solveForLabel = { strike: '执行价 (%)', coupon: '年化票息 (%)' };
+      var koTypeLabel = { period_end: '期末观察', daily: '每日观察' };
+      var kiTypeLabel = { na: '不适用', eop: '期末' };
+      var currencyLabel = { USD: '美元', EUR: '欧元', HKD: '港币' };
+      var sourceLabel = { web: '页面', automation: '自动化', script: '脚本' };
+
+      function setDetail(id, val) {
+        var el = document.getElementById(id);
+        if (el) el.value = val != null ? String(val) : '—';
+      }
+
+      function openRfqDetail(batchId) {
+        document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+        var detailPanel = document.getElementById('panel-rfq-detail');
+        if (detailPanel) detailPanel.classList.add('active');
+        stopRfqHistoryPoll();
+
+        setDetail('detail-batch-id', batchId);
+        setDetail('detail-time', '加载中…');
+        ['detail-product','detail-underlying','detail-notional','detail-tenor','detail-source',
+         'detail-currency','detail-solve-for','detail-strike','detail-ko-type','detail-ko',
+         'detail-coupon','detail-par','detail-ki-type','detail-ki','detail-obs-freq','detail-settle'
+        ].forEach(function (id) { setDetail(id, ''); });
+        document.getElementById('detail-quotes').innerHTML = '';
+        document.getElementById('detail-quote-count').textContent = '0';
+
+        fetch(apiUrl('/api/rfq/' + encodeURIComponent(batchId)), { method: 'GET' })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.error) { setDetail('detail-time', '未找到'); return; }
+
+            setDetail('detail-batch-id', d.batch_id);
+            setDetail('detail-time', d.created_at_iso);
+            setDetail('detail-product', d.product);
+            setDetail('detail-source', sourceLabel[d.source] || d.source || '—');
+
+            setDetail('detail-underlying', d.underlying);
+            setDetail('detail-currency', currencyLabel[d.currency] || d.currency || '—');
+            setDetail('detail-notional', d.notional != null ? Number(d.notional).toLocaleString() : '—');
+            setDetail('detail-tenor', d.tenor_months);
+            setDetail('detail-solve-for', solveForLabel[d.solve_for] || d.solve_for || '—');
+            setDetail('detail-strike', d.strike_pct || '—');
+            setDetail('detail-ko-type', koTypeLabel[d.ko_type] || d.ko_type || '—');
+            setDetail('detail-ko', d.ko_pct || '—');
+            setDetail('detail-coupon', d.coupon_pct || '—');
+            setDetail('detail-par', d.par_pct || '—');
+            setDetail('detail-ki-type', kiTypeLabel[d.ki_type] || d.ki_type || '—');
+            setDetail('detail-ki', d.ki_pct || '—');
+            setDetail('detail-obs-freq', d.obs_freq ? d.obs_freq + ' 个月' : '—');
+            setDetail('detail-settle', d.settle_cycle ? 'T+' + d.settle_cycle : '—');
+
+            var quotes = d.quotes || [];
+            document.getElementById('detail-quote-count').textContent = quotes.length;
+            var tbody = document.getElementById('detail-quotes');
+            tbody.innerHTML = '';
+            quotes.forEach(function (q, idx) {
+              var tr = document.createElement('tr');
+              tr.innerHTML =
+                '<td>' + (idx + 1) + '</td>' +
+                '<td>' + (q.institution || '') + '</td>' +
+                '<td style="font-family: JetBrains Mono, monospace;">' + (q.quote_id || '') + '</td>' +
+                '<td style="font-weight: 600;">' + (q.coupon_annual_pct || '') + '</td>' +
+                '<td><span class="status-pill success">' + (q.status || '') + '</span></td>';
+              tbody.appendChild(tr);
+            });
+          })
+          .catch(function () {
+            setDetail('detail-time', '加载失败');
+          });
+      }
+
+      /** 返回询价列表 */
+      document.getElementById('btn-rfq-back').addEventListener('click', function () {
+        document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+        document.getElementById('panel-rfq').classList.add('active');
+        loadRfqHistory();
+        startRfqHistoryPoll();
+      });
+
+      /* 首页 · 市场热度排名（演示） */
+      var HEAT_RANK = {
+        us: {
+          title: '美股 · 热度榜',
+          rows: [
+            { code: 'NVDA', name: '英伟达', heat: 98, chg: 2.14 },
+            { code: 'AAPL', name: '苹果', heat: 96, chg: 0.82 },
+            { code: 'TSLA', name: '特斯拉', heat: 94, chg: -1.25 },
+            { code: 'MSFT', name: '微软', heat: 91, chg: 0.51 },
+            { code: 'META', name: 'Meta', heat: 89, chg: 1.08 },
+            { code: 'GOOGL', name: '谷歌-A', heat: 87, chg: 0.33 },
+            { code: 'AMZN', name: '亚马逊', heat: 85, chg: 0.91 },
+            { code: 'AMD', name: 'AMD', heat: 83, chg: -0.42 }
+          ]
+        },
+        hk: {
+          title: '港股 · 热度榜',
+          rows: [
+            { code: '00700', name: '腾讯控股', heat: 95, chg: 1.52 },
+            { code: '09988', name: '阿里巴巴-SW', heat: 93, chg: 2.01 },
+            { code: '03690', name: '美团-W', heat: 90, chg: -0.63 },
+            { code: '01810', name: '小米集团-W', heat: 88, chg: 3.18 },
+            { code: '01299', name: '友邦保险', heat: 85, chg: 0.22 },
+            { code: '02318', name: '中国平安', heat: 82, chg: 0.45 },
+            { code: '00939', name: '建设银行', heat: 78, chg: 0.11 }
+          ]
+        },
+        cn: {
+          title: 'A股 · 沪深热度榜',
+          rows: [
+            { code: '600519', name: '贵州茅台', heat: 97, chg: 1.76 },
+            { code: '300750', name: '宁德时代', heat: 94, chg: 0.88 },
+            { code: '002594', name: '比亚迪', heat: 92, chg: -0.31 },
+            { code: '601318', name: '中国平安', heat: 89, chg: 0.39 },
+            { code: '600036', name: '招商银行', heat: 86, chg: 0.58 },
+            { code: '688981', name: '中芯国际', heat: 84, chg: 1.12 },
+            { code: '601899', name: '紫金矿业', heat: 81, chg: 2.05 }
+          ]
+        }
+      };
+
+      function formatChg(n) {
+        if (n > 0) return '<span class="heat-up">+' + n.toFixed(2) + '%</span>';
+        if (n < 0) return '<span class="heat-down">' + n.toFixed(2) + '%</span>';
+        return '<span class="heat-flat">0.00%</span>';
+      }
+
+      function renderHomeRank(market) {
+        var data = HEAT_RANK[market];
+        if (!data) return;
+        var titleEl = document.getElementById('home-market-title');
+        if (titleEl) titleEl.textContent = data.title;
+        var tbody = document.getElementById('home-rank-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        data.rows.forEach(function (row, i) {
+          var tr = document.createElement('tr');
+          var rk = i + 1;
+          tr.innerHTML =
+            '<td class="heat-rank' + (rk <= 3 ? ' top3' : '') + '">' + rk + '</td>' +
+            '<td style="font-family: JetBrains Mono, monospace;">' + row.code + '</td>' +
+            '<td>' + row.name + '</td>' +
+            '<td class="heat-score">' + row.heat + '</td>' +
+            '<td>' + formatChg(row.chg) + '</td>';
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.querySelectorAll('#home-market-tabs .mtab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('#home-market-tabs .mtab').forEach(function (t) { t.classList.remove('active'); });
+          this.classList.add('active');
+          renderHomeRank(this.dataset.market);
+        });
+      });
+      renderHomeRank('us');
+
+      /* 研报页：全球指数 + 分市场标的 */
+      var GLOBAL_INDICES = [
+        { code: 'SPX', name: '标普 500', px: '5,234.18', chg: 0.42 },
+        { code: 'NDX', name: '纳斯达克 100', px: '18,201.44', chg: 0.67 },
+        { code: 'HSI', name: '恒生指数', px: '16,892.30', chg: -0.21 },
+        { code: 'CSI300', name: '沪深300', px: '3,456.78', chg: 0.35 },
+        { code: 'N225', name: '日经 225', px: '38,920.15', chg: 1.02 },
+        { code: 'SX5E', name: '欧洲斯托克50', px: '4,812.60', chg: -0.15 }
+      ];
+
+      var RESEARCH_BY_MARKET = {
+        us: {
+          title: '美股 · 标的行情与要点',
+          blurb: '美股科技龙头对全球 FCN / ELN 票息定价影响显著；AI 与半导体链条波动率仍高于大盘，询价时需关注标的相关系数与集中度。',
+          cross: '跨市场对照：<code>BABA</code>（NYSE）与 <code>09988.HK</code> 常作为大中华科技敞口的一体两面，价差与汇率对票息有间接影响。',
+          rows: [
+            { code: 'NVDA', name: '英伟达', px: '892.10', chg: 2.1, note: 'AI 算力主线，波动大；FCN 常设较高敲出价或缩短观察频率以控风险。' },
+            { code: 'AAPL', name: '苹果', px: '178.35', chg: 0.5, note: '现金流稳健，票息区间相对窄；适合与成长股组合分散标的集中度。' },
+            { code: 'TSLA', name: '特斯拉', px: '248.60', chg: -1.8, note: '高弹性标的，近月隐含波动仍高；询价条款中 KO/KI 边界需与发行商模型对齐。' },
+            { code: 'MSFT', name: '微软', px: '415.22', chg: 0.3, note: '云与 AI 叙事与 NVDA 联动强，组合标的相关性偏高，注意分散。' }
+          ]
+        },
+        hk: {
+          title: '港股 · 标的行情与要点',
+          blurb: '港股流动性与南向资金对科技、互联网平台标的定价敏感；美元利率与离岸人民币波动共同影响港币计价结构化产品。',
+          cross: 'AH 溢价：<code>601318</code>（A）与 <code>02318</code>（H）中国平安可作为保险板块跨市场参考。',
+          rows: [
+            { code: '00700', name: '腾讯控股', px: '382.40', chg: 1.2, note: '游戏与广告复苏预期支撑盈利；南向持续配置，适合作为大中华篮子核心标的。' },
+            { code: '09988', name: '阿里巴巴-SW', px: '78.65', chg: 2.0, note: '电商与云业务分拆预期反复；波动率高于部分同业，票息报价分化明显。' },
+            { code: '03690', name: '美团-W', px: '112.30', chg: -0.6, note: '本地生活竞争格局影响估值；短期事件驱动多，适合缩短观察窗口的条款设计。' },
+            { code: '01810', name: '小米集团-W', px: '16.88', chg: 3.1, note: '汽车与手机双轮驱动叙事；与供应链标的联动强，注意行业集中度。' }
+          ]
+        },
+        cn: {
+          title: 'A股 · 沪深标的行情与要点',
+          blurb: '沪深主板与创业板在涨跌停与交易制度上与港股、美股不同；结构化产品挂钩 A 股时需关注 T+1、停牌与指数成分调整。',
+          cross: '与海外映射：<code>300750</code> 宁德时代与全球新能源产业链（含美股锂电上游）存在板块联动。',
+          rows: [
+            { code: '600519', name: '贵州茅台', px: '1,685.00', chg: 1.1, note: '消费龙头、机构重仓；波动相对可控，常作为低相关标的入篮。' },
+            { code: '300750', name: '宁德时代', px: '198.50', chg: 0.9, note: '新能源电池龙头，与政策与原材料价格敏感；适合与白酒等低相关标的搭配。' },
+            { code: '002594', name: '比亚迪', px: '242.10', chg: -0.3, note: '整车与电池一体化；与 TSLA、日系车销量数据存在主题共振。' },
+            { code: '601318', name: '中国平安', px: '42.35', chg: 0.4, note: '金融板块代表；利率与地产政策对估值弹性大，注意宏观日历。' }
+          ]
+        },
+        eu: {
+          title: '欧股 · 标的行情与要点',
+          blurb: '欧股受欧元区 PMI、能源价格与欧元汇率驱动；与美股科技龙头存在板块轮动，部分跨国公司在美欧双重上市。',
+          cross: '跨市场：<code>ASML</code>（阿姆斯特丹）与美股半导体指数高度相关，可作为欧洲敞口与美股科技的桥梁标的。',
+          rows: [
+            { code: 'ASML', name: '阿斯麦', px: '892.40', chg: 0.6, note: '光刻机龙头，全球半导体资本开支风向标；欧元计价波动需纳入汇率条款。' },
+            { code: 'SAP', name: '思爱普', px: '178.20', chg: -0.2, note: '企业软件与云转型；与美股 SaaS 板块联动，适合作为欧洲科技分散。' },
+            { code: 'NOVO-B', name: '诺和诺德', px: '842.50', chg: 0.9, note: '医药权重高；与美债利率敏感度与成长股类似，注意行业政策。' }
+          ]
+        },
+        jp: {
+          title: '日股 · 标的行情与要点',
+          blurb: '日经指数受日元汇率与出口企业盈利双重影响；央行政策预期变化会传导至全市场波动率，挂钩日股需关注汇率对冲。',
+          cross: '与美股：<code>7203</code> 丰田与全球汽车销量、美债利率链条相关，可与 TSLA、比亚迪等放在跨区域比较框架。',
+          rows: [
+            { code: '7203', name: '丰田汽车', px: '2,845.0', chg: 0.4, note: '日元升值对出口利润压制与股价拉锯；传统车企电动化叙事持续。' },
+            { code: '6758', name: '索尼', px: '12,890', chg: 1.1, note: '游戏与传感器业务稳健；与美股娱乐科技板块存在主题联动。' },
+            { code: '9984', name: '软银集团', px: '8,012', chg: -0.8, note: '科技投资控股波动大；与全球成长股风险偏好高度相关。' }
+          ]
+        }
+      };
+
+      function renderGlobalStrip() {
+        var wrap = document.getElementById('research-global-strip');
+        if (!wrap) return;
+        wrap.innerHTML = '';
+        GLOBAL_INDICES.forEach(function (ix) {
+          var ch = ix.chg;
+          var chHtml = ch > 0 ? '<span class="heat-up">+' + ch.toFixed(2) + '%</span>' : ch < 0 ? '<span class="heat-down">' + ch.toFixed(2) + '%</span>' : '<span class="heat-flat">0.00%</span>';
+          var div = document.createElement('div');
+          div.className = 'idx-chip';
+          div.innerHTML =
+            '<div class="nm">' + ix.name + ' · ' + ix.code + '</div>' +
+            '<div class="px">' + ix.px + '</div>' +
+            '<div class="ch">' + chHtml + ' <span style="color:var(--muted);">日涨跌（演示）</span></div>';
+          wrap.appendChild(div);
+        });
+      }
+
+      function formatChgCell(n) {
+        if (n > 0) return '<span class="heat-up">+' + n.toFixed(2) + '%</span>';
+        if (n < 0) return '<span class="heat-down">' + n.toFixed(2) + '%</span>';
+        return '<span class="heat-flat">0.00%</span>';
+      }
+
+      function renderResearchMarket(key) {
+        var d = RESEARCH_BY_MARKET[key];
+        if (!d) return;
+        var t = document.getElementById('research-region-title');
+        if (t) t.textContent = d.title;
+        var b = document.getElementById('research-region-blurb');
+        if (b) b.textContent = d.blurb;
+        var c = document.getElementById('research-cross');
+        if (c) c.innerHTML = d.cross || '';
+        var tbody = document.getElementById('research-symbol-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        d.rows.forEach(function (row) {
+          var tr = document.createElement('tr');
+          tr.innerHTML =
+            '<td style="font-family: JetBrains Mono, monospace;">' + row.code + '</td>' +
+            '<td>' + row.name + '</td>' +
+            '<td class="heat-score">' + row.px + '</td>' +
+            '<td>' + formatChgCell(row.chg) + '</td>' +
+            '<td style="font-size: 0.8rem; color: var(--muted); max-width: 22rem;">' + row.note + '</td>';
+          tbody.appendChild(tr);
+        });
+      }
+
+      renderGlobalStrip();
+      renderResearchMarket('us');
+      document.querySelectorAll('#research-market-tabs .mtab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('#research-market-tabs .mtab').forEach(function (x) { x.classList.remove('active'); });
+          this.classList.add('active');
+          renderResearchMarket(this.dataset.rm);
+        });
+      });
+
+      document.getElementById('btn-home-goto-rfq').addEventListener('click', function () {
+        document.querySelectorAll('nav button').forEach(function (b) { b.classList.remove('active'); });
+        document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+        var subBtns = document.querySelectorAll('nav .nav-sub button');
+        document.querySelectorAll('nav > button[data-panel="rfq"]').forEach(function (b) {
+          if (b.textContent.indexOf('询价') >= 0 && b.querySelector('.ico')) b.classList.add('active');
+        });
+        subBtns.forEach(function (b) { b.classList.remove('active'); });
+        if (subBtns[0]) subBtns[0].classList.add('active');
+        var parentRfq = document.querySelector('nav .nav-sub');
+        if (parentRfq && parentRfq.previousElementSibling) parentRfq.previousElementSibling.classList.add('active');
+        document.getElementById('panel-rfq').classList.add('active');
+        loadRfqHistory();
+        startRfqHistoryPoll();
+      });
+
+      /* 导航 */
+      document.querySelectorAll('nav button').forEach(function (btn) {
+        if (!btn.dataset.panel) return;
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('nav button').forEach(function (b) { b.classList.remove('active'); });
+          document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+          btn.classList.add('active');
+          var panel = document.getElementById('panel-' + btn.dataset.panel);
+          if (panel) panel.classList.add('active');
+          if (panel && panel.id === 'panel-rfq') {
+            loadRfqHistory();
+            startRfqHistoryPoll();
+          } else {
+            stopRfqHistoryPoll();
+          }
+        });
+      });
+
+      /* 询价页：场景 / 产品选项卡 */
+      document.querySelectorAll('#panel-rfq .scenario-tabs .tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('#panel-rfq .scenario-tabs .tab').forEach(function (t) { t.classList.remove('active'); });
+          this.classList.add('active');
+        });
+      });
+      document.querySelectorAll('#panel-rfq .product-tabs .tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('#panel-rfq .product-tabs .tab').forEach(function (t) { t.classList.remove('active'); });
+          this.classList.add('active');
+        });
+      });
+      document.getElementById('rfq-remark').addEventListener('input', function () {
+        document.getElementById('rfq-remark-count').textContent = this.value.length;
+      });
+      document.querySelectorAll('#rfq-und-picks input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          var cnt = document.querySelectorAll('#rfq-und-picks input[type="checkbox"]:checked').length;
+          document.getElementById('rfq-und-count').textContent = cnt;
+        });
+      });
+
+      /* 询价 → POST /api/rfq（使用新增询价表单字段） */
+      document.getElementById('btn-rfq-send').addEventListener('click', function () {
+        var activeProduct = document.querySelector('#panel-rfq .product-tabs .tab.active');
+        var product = (activeProduct && activeProduct.dataset.product) ? activeProduct.dataset.product : 'FCN';
+        var checkedBoxes = document.querySelectorAll('#rfq-und-picks input[type="checkbox"]:checked');
+        var undArr = [];
+        checkedBoxes.forEach(function (cb) { undArr.push(cb.value); });
+        var und = undArr.length > 0 ? undArr.join(',') : '0/4';
+        var tenor = parseInt(document.getElementById('rfq-tenor').value, 10) || 6;
+        var notional = 1000000;
+        log('log-rfq', 'info', '→ POST /api/rfq product=' + product + ' underlying=' + und + ' tenor=' + tenor + 'M');
+
+        fetch(apiUrl('/api/rfq'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            product: product,
+            underlying: und,
+            notional: notional,
+            tenor_months: tenor,
+            currency: document.getElementById('rfq-currency').value,
+            solve_for: document.getElementById('rfq-solve-for').value,
+            strike_pct: document.getElementById('rfq-strike').value,
+            ko_type: document.getElementById('rfq-ko-type').value,
+            ko_pct: document.getElementById('rfq-ko').value,
+            coupon_pct: document.getElementById('rfq-coupon').value,
+            par_pct: document.getElementById('rfq-par').value,
+            ki_type: document.getElementById('rfq-ki-type').value,
+            ki_pct: document.getElementById('rfq-ki').value,
+            obs_freq: document.getElementById('rfq-obs-freq').value,
+            settle_cycle: document.getElementById('rfq-settle').value
+          })
+        })
+          .then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          })
+          .then(function (data) {
+            var tbody = document.getElementById('rfq-results');
+            tbody.innerHTML = '';
+            (data.quotes || []).forEach(function (q) {
+              log('log-rfq', 'ok', '← ' + q.institution + ' | ' + q.quote_id + ' | ' + q.coupon_annual_pct + '%');
+              var tr = document.createElement('tr');
+              tr.innerHTML = '<td>' + q.institution + '</td><td>' + q.quote_id + '</td><td>' + q.coupon_annual_pct + '</td><td><span class="status-pill success">' + q.status + '</span></td>';
+              tbody.appendChild(tr);
+            });
+            log('log-rfq', 'ok', data.message || '询价完成 batch=' + data.rfq_batch_id);
+            loadRfqHistory();
+          })
+          .catch(function (e) {
+            log('log-rfq', 'err', '请求失败: ' + e.message + ' — 请先启动后端');
+          });
+      });
+
+      document.getElementById('btn-rfq-refresh-history').addEventListener('click', function () {
+        loadRfqHistory();
+      });
+
+      document.getElementById('btn-rfq-clear').addEventListener('click', function () {
+        clearLog('log-rfq');
+        document.getElementById('rfq-results').innerHTML = '';
+      });
+
+      /* 询价子菜单点击时高亮当前项，并保持父级「询价」高亮 */
+      var navSub = document.querySelector('nav .nav-sub');
+      if (navSub) {
+        var parentRfq = navSub.previousElementSibling;
+        document.querySelectorAll('nav .nav-sub button').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            document.querySelectorAll('nav .nav-sub button').forEach(function (b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            if (parentRfq) parentRfq.classList.add('active');
+          });
+        });
+      }
+
+      /* 下单 */
+      function getOrderRfqId() {
+        var el = document.querySelector('#panel-order #order-rfq-id');
+        return el ? String(el.value).trim() : '';
+      }
+
+      document.getElementById('btn-order-validate').addEventListener('click', function () {
+        var id = getOrderRfqId();
+        log('log-order', 'info', '校验: rfqId=' + (id || '(空)') + ' side=' + document.getElementById('order-side').value);
+        if (!id) {
+          log('log-order', 'err', '校验失败: 关联报价 ID 不能为空');
+          return;
+        }
+        log('log-order', 'ok', '校验通过');
+      });
+
+      document.getElementById('btn-order-submit').addEventListener('click', function () {
+        var id = getOrderRfqId();
+        if (!id) {
+          log('log-order', 'err', '提交失败: 请在「关联报价 ID」中输入内容（灰色字仅为占位提示，不会作为已填值）');
+          document.getElementById('order-status-text').innerHTML = '<span class="status-pill fail">失败</span> 未填写报价 ID';
+          return;
+        }
+        document.getElementById('order-status-text').innerHTML = '<span class="status-pill pending">处理中</span> POST /api/order…';
+        fetch(apiUrl('/api/order'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rfq_id: id,
+            side: document.getElementById('order-side').value,
+            qty: parseInt(document.getElementById('order-qty').value, 10) || 1,
+            price_type: document.getElementById('order-price-type').value,
+            extra: document.getElementById('order-extra').value || null
+          })
+        })
+          .then(function (r) {
+            if (!r.ok) return r.json().then(function (j) { throw new Error(j.detail || 'HTTP ' + r.status); });
+            return r.json();
+          })
+          .then(function (data) {
+            log('log-order', 'ok', '← ' + (data.message || '') + ' orderId=' + data.order_id);
+            document.getElementById('order-status-text').innerHTML = '<span class="status-pill success">已成交</span> ' + data.order_id;
+          })
+          .catch(function (e) {
+            log('log-order', 'err', '提交失败: ' + e.message);
+            document.getElementById('order-status-text').innerHTML = '<span class="status-pill fail">失败</span> ' + e.message;
+          });
+      });
+
+      document.getElementById('btn-order-clear').addEventListener('click', function () {
+        clearLog('log-order');
+        document.getElementById('order-status-text').textContent = '尚未提交';
+      });
+
+      /* 存续 */
+      document.getElementById('lc-date').valueAsDate = new Date();
+
+      function refreshTimeline(contractId) {
+        fetch(apiUrl('/api/lifecycle/timeline/' + encodeURIComponent(contractId)))
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var tb = document.getElementById('lc-timeline');
+            tb.innerHTML = '';
+            var labels = { OBSERVATION: '观察日', COUPON: '派息', KNOCK_OUT: '敲出', MATURITY: '到期', AMENDMENT: '条款变更' };
+            (data.items || []).forEach(function (e) {
+              var pill = e.outcome === 'success' ? 'success' : e.outcome === 'pending' ? 'pending' : 'fail';
+              var pt = e.outcome === 'success' ? '成功' : e.outcome === 'pending' ? '处理中' : '失败';
+              var tr = document.createElement('tr');
+              tr.innerHTML = '<td>' + (e.time || '').slice(0, 19).replace('T', ' ') + '</td><td>' + (e.event_label || labels[e.event_type] || e.event_type) + '</td><td><span class="status-pill ' + pill + '">' + pt + '</span></td>';
+              tb.appendChild(tr);
+            });
+          })
+          .catch(function () {});
+      }
+
+      document.getElementById('btn-lc-query').addEventListener('click', function () {
+        var c = document.getElementById('lc-contract').value.trim();
+        if (!c) { log('log-lifecycle', 'err', '请填写合约编号'); return; }
+        log('log-lifecycle', 'info', '→ GET /api/lifecycle/contract/' + c);
+        fetch(apiUrl('/api/lifecycle/contract/' + encodeURIComponent(c)))
+          .then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          })
+          .then(function (snap) {
+            log('log-lifecycle', 'ok', '← ' + snap.message + ' | status=' + snap.status + ' phase=' + snap.phase + ' couponPaid=' + snap.coupon_paid);
+            refreshTimeline(c);
+          })
+          .catch(function (e) {
+            log('log-lifecycle', 'err', '查询失败: ' + e.message);
+          });
+      });
+
+      document.getElementById('btn-lc-trigger').addEventListener('click', function () {
+        var contract = document.getElementById('lc-contract').value.trim();
+        var ev = document.getElementById('lc-event').value;
+        var d = document.getElementById('lc-date').value;
+        var outcome = document.getElementById('lc-outcome').value;
+        if (!contract) { log('log-lifecycle', 'err', '请填写合约编号'); return; }
+        log('log-lifecycle', 'info', '→ POST /api/lifecycle/event');
+        fetch(apiUrl('/api/lifecycle/event'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contract_id: contract,
+            event_type: ev,
+            event_date: d,
+            outcome: outcome
+          })
+        })
+          .then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          })
+          .then(function () {
+            var labels = { OBSERVATION: '观察日', COUPON: '派息', KNOCK_OUT: '敲出', MATURITY: '到期', AMENDMENT: '条款变更' };
+            var pill = outcome === 'success' ? 'success' : outcome === 'pending' ? 'pending' : 'fail';
+            var pillText = outcome === 'success' ? '成功' : outcome === 'pending' ? '处理中' : '失败';
+            log('log-lifecycle', outcome === 'fail' ? 'err' : 'ok', '← 事件已写入后端 | ' + pillText);
+            var tb = document.getElementById('lc-timeline');
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td>' + nowStr().slice(0, 19) + '</td><td>' + labels[ev] + '</td><td><span class="status-pill ' + pill + '">' + pillText + '</span></td>';
+            tb.insertBefore(tr, tb.firstChild);
+          })
+          .catch(function (e) {
+            log('log-lifecycle', 'err', '失败: ' + e.message);
+          });
+      });
+
+      document.getElementById('btn-lc-clear').addEventListener('click', function () {
+        clearLog('log-lifecycle');
+        document.getElementById('lc-timeline').innerHTML = '';
+      });
+    })();
+  </script>
+</body>
+</html>

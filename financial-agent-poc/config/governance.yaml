@@ -1,0 +1,41 @@
+# 金融 PoC 合规与成本治理基线（可随组织策略调整）
+
+data_classification:
+  levels: [public, internal, confidential, restricted]
+  default_for_test_artifacts: internal
+  pii_fields_treated_as_restricted: true
+
+desensitization:
+  enabled: true
+  patterns:
+    - name: id_card_cn
+      regex: "\\b[1-9]\\d{5}(18|19|20)\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])\\d{3}[0-9Xx]\\b"
+      replacement: "***ID18***"
+    - name: bank_card_cn
+      regex: "\\b(?:\\d{4}[-\\s]?){3}\\d{4}\\b"
+      replacement: "***CARD***"
+    - name: mobile_cn
+      regex: "\\b1[3-9]\\d{9}\\b"
+      replacement: "***MOBILE***"
+
+audit:
+  enabled: true
+  log_pii_hashes_only: true
+  retain_run_artifacts_days: 90
+  required_trace_fields:
+    - run_id
+    - prompt_version
+    - agent_step
+    - tool_calls
+
+permissions:
+  principle: least_privilege
+  separate_execution_identity: true
+
+model_cost:
+  token_budget_per_run: 50000
+  concurrent_agent_runs: 3
+  fallback_model: "stub-deterministic"
+  circuit_breaker:
+    error_rate_threshold: 0.25
+    window_runs: 20

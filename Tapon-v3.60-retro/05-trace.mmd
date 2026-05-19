@@ -1,0 +1,39 @@
+%%{init: {"themeVariables": {"fontFamily": "Microsoft YaHei, SimHei, sans-serif"}}}%%
+flowchart LR
+  subgraph problems ["问题域"]
+    P1["交易下单 37条"]
+    P2["拼单 24条"]
+    P3["配置映射 25条"]
+    P4["UAT集成"]
+    P5["i18n/P4 19条"]
+  end
+  subgraph risks ["风险"]
+    R1["高 #8072/#8095"]
+    R2["高 #8122"]
+    R3["中 #7995/#8006"]
+    R4["中 映射13条"]
+    R5["P4清单19条"]
+  end
+  subgraph improve ["改进措施"]
+    I1["S1 流程决策表"]
+    I2["S2 Indic TS联调"]
+    I3["S3 校验中间层"]
+    I4["S5/S6 关单+T-14/T-7"]
+    I5["M1 映射CR评审"]
+    I6["M3 拼单规范"]
+    I7["M4/M5 P4准入+i18n"]
+  end
+  subgraph roles ["三端共因"]
+    RO1["产品: 规则后置"]
+    RO2["开发: 契约/校验弱"]
+    RO3["测试: UAT晚/门禁软"]
+  end
+  P1 --> R1 --> I1
+  P4 --> R2 --> I2
+  P3 --> R3 --> I3
+  P3 --> R4 --> I5
+  P2 --> I6
+  P5 --> R5 --> I7
+  RO1 --> I1
+  RO2 --> I3
+  RO3 --> I4

@@ -1,0 +1,18 @@
+%%{init: {"themeVariables": {"fontFamily": "Microsoft YaHei, SimHei, sans-serif"}}}%%
+flowchart TB
+  subgraph high ["高风险 — 须修复或风险签字"]
+    H1["#8072 跟单字段丢失<br/>状态: 激活 | 产品侧"]
+    H2["#8095 机构流程未走通<br/>状态: 激活 | 产品侧"]
+    H3["#8122 UAT Indic TS失败<br/>状态: 激活 | 发版前8天发现"]
+  end
+  subgraph mid ["中风险 — 发版前须闭环或评审"]
+    M1["#7995/#8006 配置校验<br/>状态: 已解决待关 P4"]
+    M2["字段映射批量变更 约13条<br/>状态: 多数已关"]
+    M3["发版+审批并发<br/>状态: 已关"]
+    M4["P4风险类合计 19条<br/>2条待关 17条已关"]
+  end
+  subgraph low ["低风险 — 一般不阻断主流程"]
+    L1["P3纯体验/UI优化<br/>品牌与可用性"]
+  end
+  high --> mid
+  mid --> low

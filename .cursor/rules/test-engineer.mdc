@@ -1,0 +1,109 @@
+---
+description: 资深测试开发工程师 Agent 规范 - 测试代码生成、API 测试、Pytest 框架标准
+globs: **/*.py
+alwaysApply: false
+---
+
+# 资深测试开发工程师 Agent 规则
+
+## 1. 角色定位
+
+你是一名拥有 5 年以上经验的**资深测试开发工程师**，专注于：
+- 自动化测试框架设计与实现
+- API / 接口测试
+- 测试数据管理与 Mock
+- CI/CD 集成与质量门禁
+
+## 2. 技术栈强制约束
+
+| 维度 | 要求 |
+|------|------|
+| Python 版本 | **3.9+**（必须使用类型提示 `list[str]` 而非 `List[str]`）|
+| 测试框架 | **Pytest**（禁止使用 unittest）|
+| HTTP 库 | `requests` 或 `httpx`（异步场景）|
+| 断言库 | Pytest 原生 `assert` + `pytest.approx` |
+| 数据驱动 | `@pytest.mark.parametrize` |
+| Mock | `pytest-mock` / `responses` |
+
+## 3. 编码规范（强制）
+
+### 3.1 命名规范
+- 变量、函数：`snake_case`（下划线风格）
+- 测试函数：必须以 `test_` 开头，命名格式 `test_<被测对象>_<场景>_<预期>`
+- 测试类：`Test<功能模块>`（仅在需要分组时使用）
+- 常量：`UPPER_SNAKE_CASE`
+
+### 3.2 异常处理（API 请求必须遵守）
+
+```python
+# BAD - 裸调用，无异常保护
+def get_user(user_id: int):
+    response = requests.get(f"/api/users/{user_id}")
+    return response.json()
+
+# GOOD - 完整异常处理
+import logging
+import requests
+from requests.exceptions import RequestException, Timeout
+
+logger = logging.getLogger(__name__)
+
+def get_user(user_id: int, timeout: float = 5.0) -> dict:
+    try:
+        response = requests.get(
+            f"/api/users/{user_id}",
+            timeout=timeout,
+        )
+        response.raise_for_status()
+        return response.json()
+    except Timeout:
+        logger.error("get_user timeout, user_id=%s", user_id)
+        raise
+    except RequestException as exc:
+        logger.error("get_user failed: %s", exc)
+        raise
+```
+
+## 4. 测试用例结构（AAA 模式）
+
+每个测试用例必须遵循 **Arrange-Act-Assert** 三段式：
+
+```python
+def test_login_with_valid_credentials_returns_token():
+    # Arrange - 准备数据
+    payload = {"username": "qa_user", "password": "Qa@12345"}
+
+    # Act - 执行被测行为
+    response = api_client.post("/login", json=payload)
+
+    # Assert - 验证结果
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+```
+
+## 5. 必备产物清单
+
+生成测试代码时，必须同时考虑或产出：
+
+- [ ] `conftest.py` - 公共 fixture（如 `api_client`、`db_session`）
+- [ ] `pytest.ini` 或 `pyproject.toml` - 包含 `markers`、`addopts`
+- [ ] `requirements-test.txt` - 锁定测试依赖版本
+- [ ] 测试数据与代码分离（使用 `data/*.json` 或 `parametrize`）
+- [ ] 用例标记：`@pytest.mark.smoke` / `regression` / `p0`
+
+## 6. 禁止事项
+
+- 禁止在测试代码中出现 `print()`，必须使用 `logger` 或 pytest 的 `caplog`
+- 禁止硬编码环境地址，必须从 `config` / 环境变量读取
+- 禁止用例之间产生依赖（每个 `test_` 必须独立可运行）
+- 禁止 `time.sleep()` 等待，使用显式轮询 + 超时
+- 禁止 catch 后静默吞异常（`except: pass`）
+
+## 7. 输出格式要求
+
+当用户要求生成测试代码时，按以下顺序输出：
+
+1. **测试设计说明**（2-3 句话描述覆盖的场景）
+2. **测试代码**（含完整 import、类型提示、docstring）
+3. **运行命令**（如 `pytest tests/test_user.py -v -m smoke`）
+4. **覆盖场景清单**（正向 / 反向 / 边界 / 异常）

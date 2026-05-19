@@ -1,0 +1,23 @@
+%%{init: {"themeVariables": {"fontFamily": "Microsoft YaHei, SimHei, sans-serif"}}}%%
+flowchart TB
+  subgraph snap ["数据快照 v3.60"]
+    D1["114条缺陷 | 已关闭 94.7%"]
+    D2["遗留 6条 | P4风险 19条"]
+    D3["后端 55% | 前端 41%"]
+  end
+  subgraph prob ["问题TOP3域"]
+    P1["交易/下单 37条 32%"]
+    P2["拼单链路 24条 21%"]
+    P3["配置+映射 25条高发"]
+  end
+  subgraph risk ["高风险遗留 激活"]
+    R1["#8072 跟单ISIN/Valoren"]
+    R2["#8095 机构邮件/Blotter"]
+    R3["#8122 UAT Indic TS"]
+  end
+  subgraph act ["发版后7日动作"]
+    A1["产品: 流程决策表 S1"]
+    A2["开发: 校验层+联调 S2/S3"]
+    A3["测试: T-14/T-7 关单 S5/S6"]
+  end
+  snap --> prob --> risk --> act
