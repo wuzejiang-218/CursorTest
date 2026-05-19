@@ -14,6 +14,9 @@ node_modules/
 *.pem
 credentials.json
 
+# Nested repo (internal git; avoid broken gitlink in parent)
+student/backend/
+
 # IDE / OS
 .DS_Store
 Thumbs.db
