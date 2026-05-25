@@ -384,37 +384,37 @@ def find_peer_file_in_extracted(root: Path, filename: str) -> Optional[Path]:
 
 
 def find_bundled_skill_template(root: Path, slug: str) -> Optional[Path]:
-  candidates = [
-      root / "skills" / slug / "SKILL.md",
-      root / "cli" / "skills" / slug / "SKILL.md",
-  ]
-  if slug == FIND_SKILLS_SLUG:
-      candidates.extend(
-          [
-              root / "skill" / "SKILL.md",
-              root / "cli" / "skill" / "SKILL.md",
-          ]
-      )
-  elif slug == SKILLHUB_PREFERENCE_SLUG:
-      candidates.extend(
-          [
-              root / "skill" / "SKILL.skillhub-preference.md",
-              root / "cli" / "skill" / "SKILL.skillhub-preference.md",
-          ]
-      )
-  for path in candidates:
-      if path.is_file():
-          return path
+    candidates = [
+        root / "skills" / slug / "SKILL.md",
+        root / "cli" / "skills" / slug / "SKILL.md",
+    ]
+    if slug == FIND_SKILLS_SLUG:
+        candidates.extend(
+            [
+                root / "skill" / "SKILL.md",
+                root / "cli" / "skill" / "SKILL.md",
+            ]
+        )
+    elif slug == SKILLHUB_PREFERENCE_SLUG:
+        candidates.extend(
+            [
+                root / "skill" / "SKILL.skillhub-preference.md",
+                root / "cli" / "skill" / "SKILL.skillhub-preference.md",
+            ]
+        )
+    for path in candidates:
+        if path.is_file():
+            return path
 
-  legacy_name = "SKILL.skillhub-preference.md" if slug == SKILLHUB_PREFERENCE_SLUG else "SKILL.md"
-  for match in root.rglob(legacy_name):
-      if match.parent.name != "skill":
-          continue
-      if slug == FIND_SKILLS_SLUG and match.name == "SKILL.md":
-          return match
-      if slug == SKILLHUB_PREFERENCE_SLUG and match.name == "SKILL.skillhub-preference.md":
-          return match
-  return None
+    legacy_name = "SKILL.skillhub-preference.md" if slug == SKILLHUB_PREFERENCE_SLUG else "SKILL.md"
+    for match in root.rglob(legacy_name):
+        if match.parent.name != "skill":
+            continue
+        if slug == FIND_SKILLS_SLUG and match.name == "SKILL.md":
+            return match
+        if slug == SKILLHUB_PREFERENCE_SLUG and match.name == "SKILL.skillhub-preference.md":
+            return match
+    return None
 
 
 def find_skill_file_in_extracted(root: Path, filename: str) -> Optional[Path]:
