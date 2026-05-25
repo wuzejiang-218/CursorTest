@@ -126,7 +126,7 @@ async function main() {
 
   await browser.close();
 
-  const assetsDir = join(__dirname, "..", "assets", "tapon-v3.60-retro");
+  const assetsDir = join(__dirname, "..", "BUG", "assets", "tapon-v3.60-retro");
   mkdirSync(assetsDir, { recursive: true });
   for (const name of FILES) {
     const src = join(__dirname, `${name}.png`);

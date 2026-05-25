@@ -126,14 +126,7 @@ async function main() {
 
   await browser.close();
 
-  const assetsDir = join(__dirname, "..", "assets", "tapon-v3.60-retro");
-  mkdirSync(assetsDir, { recursive: true });
-  for (const name of FILES) {
-    const src = join(__dirname, `${name}.png`);
-    copyFileSync(src, join(assetsDir, `${name}.png`));
-    copyFileSync(join(__dirname, `${name}.mmd`), join(assetsDir, `${name}.mmd`));
-  }
-  console.log(`Synced PNG to ${assetsDir}`);
+  console.log(`Rendered PNG/MMD in ${__dirname}`);
 }
 
 main().catch((e) => {
