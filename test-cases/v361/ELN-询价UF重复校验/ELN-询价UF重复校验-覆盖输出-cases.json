@@ -1,0 +1,360 @@
+{
+  "title": "v3.61 · ELN 询价 UF 重复校验覆盖案例",
+  "output_prefix": "ELN-询价UF重复校验-覆盖输出",
+  "case_id_prefix": "TC-ELN-COV",
+  "smoke_ratio": 0.2,
+  "cases": [
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "核心拦截",
+      "title": "英文环境两行仅 UF 不同提交被拦截",
+      "precondition": "D-BLOCK-01；系统语言为 English；位于 Add New Quotation 的 ELN Tab",
+      "steps": [
+        "新增 2 行 ELN 询价",
+        "除 UF 外所有字段保持一致，UF 分别填写 1 和 1.2",
+        "点击 Submit"
+      ],
+      "expected": "不提交成功；提示 Quotations with identical terms except for the UF are not supported.；页面数据保留可继续编辑",
+      "priority": "P0",
+      "type": "功能",
+      "is_smoke": true,
+      "test_data": "两行 ELN；Currency=USD；Underlying=3888.HK；Solve For=Note Price (%)；Strike=95；KO Type=NA；Tenor=6；Gross Margin=1；日期三列相同；UF=1 和 1.2"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "核心拦截",
+      "title": "中文环境两行仅 UF 不同提交被拦截",
+      "precondition": "D-BLOCK-01；系统语言为简体中文；位于 ELN Tab",
+      "steps": [
+        "新增 2 行 ELN 询价",
+        "除 UF 外所有字段一致，UF 不同",
+        "点击 Submit"
+      ],
+      "expected": "不提交成功；提示 不支持除了UF之外其他条款都相同的询价；数据保留",
+      "priority": "P0",
+      "type": "功能",
+      "is_smoke": true,
+      "test_data": "两行 ELN；Currency=USD；Underlying=3888.HK；Solve For=Note Price (%)；Strike=95；KO Type=NA；Tenor=6；Gross Margin=1；日期三列相同；UF=1 和 1.2"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "核心拦截",
+      "title": "三行仅 UF 不同提交被拦截",
+      "precondition": "D-BLOCK-02；三行 ELN 基础条款一致",
+      "steps": [
+        "新增 3 行 ELN",
+        "UF 分别填写 1、1.2、1.5，其余字段一致",
+        "点击 Submit"
+      ],
+      "expected": "触发拦截；提示文案与当前语言一致；不进入提交成功流程",
+      "priority": "P0",
+      "type": "功能",
+      "is_smoke": true,
+      "test_data": "三行 ELN；除 UF 外字段完全一致；UF=1、1.2、1.5"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "核心拦截",
+      "title": "拦截后修改 Strike 再提交放行",
+      "precondition": "已按 D-BLOCK-01 触发过拦截",
+      "steps": [
+        "修改其中一行 Strike 使两行 Strike 不同",
+        "再次点击 Submit"
+      ],
+      "expected": "不再因本规则拦截；可进入后续业务校验或提交成功",
+      "priority": "P0",
+      "type": "功能",
+      "is_smoke": true,
+      "test_data": "两行 ELN；Currency=USD；Underlying=3888.HK；Solve For=Note Price (%)；Strike=95；KO Type=NA；Tenor=6；Gross Margin=1；日期三列相同；UF=1 和 1.2"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "放行场景",
+      "title": "两行完全一致含 UF 相同不触发本规则",
+      "precondition": "D-PASS-01；两行所有字段含 UF 完全一致",
+      "steps": [
+        "填写两行完全一致的 ELN",
+        "点击 Submit"
+      ],
+      "expected": "不出现本需求指定文案；若失败则归属原有重复或业务规则",
+      "priority": "P0",
+      "type": "边界",
+      "is_smoke": true,
+      "test_data": "两行 ELN；所有字段完全一致；UF 也相同"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "放行场景",
+      "title": "UF 与 Strike 同时不同不拦截",
+      "precondition": "D-PASS-02",
+      "steps": [
+        "两行 UF 不同",
+        "同时修改其中一行 Strike",
+        "点击 Submit"
+      ],
+      "expected": "不因“仅 UF 不同”规则拦截",
+      "priority": "P0",
+      "type": "功能",
+      "test_data": "两行 ELN；UF 不同；Strike 不同；其它字段相同"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "放行场景",
+      "title": "UF 与 Gross Margin 同时不同不拦截",
+      "precondition": "D-PASS-03",
+      "steps": [
+        "两行 UF 不同",
+        "同时修改其中一行 Gross Margin",
+        "点击 Submit"
+      ],
+      "expected": "不因本规则拦截",
+      "priority": "P1",
+      "type": "功能",
+      "test_data": "两行 ELN；UF 不同；Gross Margin 不同；其它字段相同"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "放行场景",
+      "title": "UF 与 Underlying 同时不同不拦截",
+      "precondition": "D-PASS-04",
+      "steps": [
+        "两行 UF 不同",
+        "同时修改其中一行 Underlying",
+        "点击 Submit"
+      ],
+      "expected": "不因本规则拦截",
+      "priority": "P1",
+      "type": "功能",
+      "test_data": "两行 ELN；UF 不同；Underlying 不同；其它字段相同"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "放行场景",
+      "title": "单行 ELN 不触发多行比对",
+      "precondition": "D-PASS-05",
+      "steps": [
+        "仅填写 1 行 ELN 合法数据",
+        "点击 Submit"
+      ],
+      "expected": "不触发除 UF 外相同校验",
+      "priority": "P0",
+      "type": "边界",
+      "test_data": "单行 ELN 合法数据；Currency=USD；Underlying=3888.HK；Strike=95；Tenor=6；Gross Margin=1"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "放行场景",
+      "title": "三行中任意两行仅 UF 不同即拦截",
+      "precondition": "第 1、3 行除 UF 外相同；第 2 行其它字段不同",
+      "steps": [
+        "新增 3 行 ELN",
+        "构造第 1、3 行仅 UF 不同",
+        "点击 Submit"
+      ],
+      "expected": "只要存在任意一对满足条件即拦截；若产品定义不同则标记待确认",
+      "priority": "P1",
+      "type": "决策表",
+      "test_data": "三行 ELN；第 1、3 行除 UF 外完全相同且 UF 不同；第 2 行其它字段不同"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "字段覆盖",
+      "title": "Currency 不同则不拦截",
+      "precondition": "两行 UF 不同，其余字段相同，仅 Currency 不同",
+      "steps": [
+        "第一行 Currency=USD",
+        "第二行 Currency=HKD",
+        "点击 Submit"
+      ],
+      "expected": "不因本规则拦截",
+      "priority": "P1",
+      "type": "等价类",
+      "test_data": "两行 ELN；UF 不同；仅 Currency 不同（USD/HKD）；其它字段相同"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "字段覆盖",
+      "title": "Solve For 不同则不拦截",
+      "precondition": "两行 UF 不同，其余字段相同，仅 Solve For 不同",
+      "steps": [
+        "分别选择不同 Solve For",
+        "点击 Submit"
+      ],
+      "expected": "不因本规则拦截",
+      "priority": "P1",
+      "type": "等价类",
+      "test_data": "两行 ELN；UF 不同；仅 Solve For 不同；其它字段相同"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "字段覆盖",
+      "title": "Tenor 不同则不拦截",
+      "precondition": "两行 UF 不同，其余字段相同，仅 Tenor 不同",
+      "steps": [
+        "第一行 Tenor=6",
+        "第二行 Tenor=12",
+        "点击 Submit"
+      ],
+      "expected": "不因本规则拦截",
+      "priority": "P1",
+      "type": "等价类",
+      "test_data": "两行 ELN；UF 不同；仅 Tenor 不同（6/12）；其它字段相同"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "字段覆盖",
+      "title": "日期字段不同则不拦截",
+      "precondition": "两行 UF 不同，其余字段相同，仅 Issue Date 或 Maturity Date 不同",
+      "steps": [
+        "修改其中一行日期字段",
+        "点击 Submit"
+      ],
+      "expected": "不因本规则拦截",
+      "priority": "P1",
+      "type": "边界",
+      "test_data": "两行 ELN；UF 不同；仅 Issue Date 或 Maturity Date 不同；其它字段相同"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "字段覆盖",
+      "title": "KO Type 不同则不拦截",
+      "precondition": "两行 UF 不同，其余字段相同，仅 KO Type 不同",
+      "steps": [
+        "修改 KO Type",
+        "点击 Submit"
+      ],
+      "expected": "不因本规则拦截",
+      "priority": "P2",
+      "type": "等价类",
+      "test_data": "两行 ELN；UF 不同；仅 KO Type 不同；其它字段相同"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "品类范围",
+      "title": "FCN Tab 两行仅 UF 不同不触发 ELN 专用提示",
+      "precondition": "D-OTHER-01；FCN Tab 可编辑两行",
+      "steps": [
+        "切换到 FCN Tab",
+        "构造两行仅 UF 不同（若存在 UF 列）",
+        "点击 Submit"
+      ],
+      "expected": "不出现 ELN 专用提示文案",
+      "priority": "P1",
+      "type": "范围",
+      "test_data": "FCN Tab 两行数据；仅 UF 不同（若 FCN 存在 UF 字段）"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "品类范围",
+      "title": "其它产品 Tab 不加载 ELN UF 校验",
+      "precondition": "存在 Step-down FCN、Sharkfin、BEN 等 Tab",
+      "steps": [
+        "依次切换其它产品 Tab",
+        "执行基础新增和提交校验"
+      ],
+      "expected": "无 ELN UF 校验报错；原有产品校验正常",
+      "priority": "P2",
+      "type": "回归",
+      "test_data": "Step-down FCN、Sharkfin、BEN 等非 ELN 产品基础合法数据"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "交互体验",
+      "title": "切换 Tab 后返回 ELN 再提交仍拦截",
+      "precondition": "ELN 已填写 D-BLOCK-01",
+      "steps": [
+        "切换到 FCN Tab",
+        "再切回 ELN Tab",
+        "点击 Submit"
+      ],
+      "expected": "ELN 数据保留；再次提交仍触发拦截",
+      "priority": "P1",
+      "type": "状态转换",
+      "test_data": "两行 ELN；Currency=USD；Underlying=3888.HK；Solve For=Note Price (%)；Strike=95；KO Type=NA；Tenor=6；Gross Margin=1；日期三列相同；UF=1 和 1.2"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "交互体验",
+      "title": "拦截后 Submit 按钮可再次点击",
+      "precondition": "已触发拦截提示",
+      "steps": [
+        "关闭或等待提示消失",
+        "不改数据再次点击 Submit"
+      ],
+      "expected": "仍可点击；继续提示；页面无卡死",
+      "priority": "P1",
+      "type": "可用性",
+      "test_data": "D-BLOCK-01 数据触发拦截后，不修改任何字段再次提交"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "交互体验",
+      "title": "删除到只剩一行后提交不拦截",
+      "precondition": "D-BLOCK-01 已触发拦截",
+      "steps": [
+        "删除其中一行",
+        "点击 Submit"
+      ],
+      "expected": "不触发多行 UF 校验",
+      "priority": "P2",
+      "type": "状态转换",
+      "test_data": "两行 ELN；Currency=USD；Underlying=3888.HK；Solve For=Note Price (%)；Strike=95；KO Type=NA；Tenor=6；Gross Margin=1；日期三列相同；UF=1 和 1.2"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "交互体验",
+      "title": "修改 UF 为相同后不触发本规则",
+      "precondition": "D-BLOCK-01 已触发拦截",
+      "steps": [
+        "将两行 UF 改为相同值",
+        "点击 Submit"
+      ],
+      "expected": "不出现本需求指定提示；其它重复规则另判",
+      "priority": "P2",
+      "type": "边界",
+      "test_data": "两行 ELN；Currency=USD；Underlying=3888.HK；Solve For=Note Price (%)；Strike=95；KO Type=NA；Tenor=6；Gross Margin=1；日期三列相同；UF=1 和 1.2"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "兼容与回归",
+      "title": "Chrome 与 Edge 行为一致",
+      "precondition": "准备 Chrome / Edge 浏览器；D-BLOCK-01",
+      "steps": [
+        "分别在两个浏览器执行核心拦截流程"
+      ],
+      "expected": "拦截逻辑、提示文案、数据保留行为一致",
+      "priority": "P2",
+      "type": "兼容",
+      "test_data": "两行 ELN；Currency=USD；Underlying=3888.HK；Solve For=Note Price (%)；Strike=95；KO Type=NA；Tenor=6；Gross Margin=1；日期三列相同；UF=1 和 1.2"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "兼容与回归",
+      "title": "ELN 单行合法提交原有校验不受影响",
+      "precondition": "ELN Tab；单行合法数据",
+      "steps": [
+        "填写单行合法数据",
+        "点击 Submit"
+      ],
+      "expected": "原有必填、格式、日期校验正常；不出现本需求提示",
+      "priority": "P1",
+      "type": "回归",
+      "test_data": "ELN Tab；单行合法数据"
+    },
+    {
+      "requirement": "ELN 多行询价除 UF 外条款相同拦截",
+      "module": "兼容与回归",
+      "title": "Add 行与 Copy 行后仍按最新数据比对",
+      "precondition": "ELN Tab 支持 Add / Copy 行",
+      "steps": [
+        "新增或复制一行",
+        "调整为仅 UF 不同",
+        "点击 Submit"
+      ],
+      "expected": "按当前表格最新行数据执行校验并拦截",
+      "priority": "P1",
+      "type": "回归",
+      "test_data": "通过 Add 或 Copy 生成新行后，构造两行除 UF 外完全相同、UF 不同"
+    }
+  ]
+}
